@@ -14,6 +14,10 @@ export async function createUser(user: CreateUserParams) {
   try {
     await connectToDatabase()
 
+    if (!user.firstName || !user.lastName) {
+      throw new Error("Both firstName and lastName are required.");
+    }
+
     const newUser = await User.create(user)
     return JSON.parse(JSON.stringify(newUser))
   } catch (error) {
