@@ -33,13 +33,11 @@ export async function POST(req: Request) {
       'svix-signature': svix_signature,
     }) as WebhookEvent;
   } catch (err) {
-    console.error('❌ Error verifying webhook:', err);
     return new Response('Invalid webhook signature', { status: 400 });
   }
 
   const eventType = evt.type;
   if (eventType.startsWith('session.')) {
-    console.log(`ℹ️ Ignoring session event: ${eventType}`);
     return new Response('Ignored', { status: 200 });
   }
 
@@ -47,7 +45,6 @@ export async function POST(req: Request) {
     if (eventType === 'user.created') {
       const { id, email_addresses, image_url, first_name, last_name, username } = evt.data;
       if (!first_name || !last_name) {
-        console.error('❌ Error: Missing firstName or lastName in Clerk event data');
         return NextResponse.json({ message: 'Missing firstName or lastName' }, { status: 400 });
       }
 
@@ -87,7 +84,6 @@ export async function POST(req: Request) {
     if (eventType === 'user.deleted') {
       const { id } = evt.data;
       if (!id) {
-        console.error('❌ Error: User ID is missing in deletion event');
         return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
       }
       const deletedUser = await deleteUser(id);
@@ -96,7 +92,6 @@ export async function POST(req: Request) {
 
     return new Response('Unhandled event type', { status: 400 });
   } catch (error) {
-    console.error('❌ Error processing webhook:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
